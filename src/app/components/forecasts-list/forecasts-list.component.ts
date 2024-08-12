@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { WeatherService } from '../weather.service';
+import { WeatherService } from '../../services/weather/weather.service';
 import { Forecast } from './forecast.type';
 
 @Component({

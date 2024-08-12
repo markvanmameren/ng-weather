@@ -1,31 +1,21 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-import { AppComponent } from './app.component';
-import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
-import { LocationService } from './location.service';
-import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
-import { WeatherService } from './weather.service';
-import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
-import { MainPageComponent } from './main-page/main-page.component';
+import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { routing } from './app.routing';
-import { HttpClientModule } from '@angular/common/http';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
+import { AppComponent } from './app.component';
+import { routes } from './app.routes';
+import { CurrentConditionsComponent } from './components/current-conditions/current-conditions.component';
+import { ForecastsListComponent } from './components/forecasts-list/forecasts-list.component';
+import { MainPageComponent } from './components/main-page/main-page.component';
+import { ZipcodeEntryComponent } from './components/zipcode-entry/zipcode-entry.component';
+import { LocationService } from './services/location/location.service';
+import { WeatherService } from './services/weather/weather.service';
 
 @NgModule({
   declarations: [AppComponent, ZipcodeEntryComponent, ForecastsListComponent, CurrentConditionsComponent, MainPageComponent],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    RouterModule,
-    routing,
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
-  ],
-  providers: [LocationService, WeatherService],
+  imports: [BrowserModule, FormsModule, RouterModule.forRoot(routes)],
+  providers: [LocationService, WeatherService, provideHttpClient()],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
