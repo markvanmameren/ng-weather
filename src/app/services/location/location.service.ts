@@ -4,7 +4,9 @@ import { WeatherService } from '../weather/weather.service';
 
 export const storageKey = 'locations';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LocationService {
   private weatherService = inject(WeatherService);
   private localStorageService = inject(LocalStorageService);
