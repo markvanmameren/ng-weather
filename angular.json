@@ -15,16 +15,9 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
-            "assets": [
-              "src/assets",
-              "src/favicon.ico",
-              "src/manifest.json"
-            ],
-            "styles": [
-              "src/styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
-            ],
+            "polyfills": ["zone.js"],
+            "assets": ["src/assets", "src/favicon.ico", "src/manifest.json"],
+            "styles": ["src/styles.css", "node_modules/bootstrap/dist/css/bootstrap.min.css"],
             "scripts": [],
             "aot": false,
             "vendorChunk": true,
@@ -77,32 +70,17 @@
           "options": {
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
-            "styles": [
-              "src/styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
-            ],
-            "assets": [
-              "src/assets",
-              "src/favicon.ico",
-              "src/manifest.json"
-            ]
+            "styles": ["src/styles.css", "node_modules/bootstrap/dist/css/bootstrap.min.css"],
+            "assets": ["src/assets", "src/favicon.ico", "src/manifest.json"]
           }
-        }
-      }
-    },
-    "ng-weather-e2e": {
-      "root": "",
-      "sourceRoot": "",
-      "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "ng-weather:serve"
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
@@ -116,5 +94,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }
