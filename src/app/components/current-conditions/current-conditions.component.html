@@ -1,5 +1,5 @@
 <div>
-  @for (location of currentConditionsByZip(); track location) {
+  @for (location of currentConditions$ | async; track location) {
     <div
       class="well flex"
       (click)="showForecast(location.zip)">
@@ -18,11 +18,11 @@
       <div>
         <span
           class="close"
-          (click)="removeLocation(location.zip)"
+          (click)="$event.stopPropagation(); removeLocation(location.zip)"
           >&times;</span
-          >
-          <img [src]="getIcon(location.data.weather[0].id)" />
-        </div>
+        >
+        <img [src]="getIcon(location.data.weather[0].id)" />
       </div>
-    }
-  </div>
+    </div>
+  }
+</div>

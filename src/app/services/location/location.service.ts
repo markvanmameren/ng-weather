@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, tap } from 'rxjs';
 import { LocalStorageService } from '../local-storage/local-storage.service';
-import { WeatherService } from '../weather/weather.service';
 
 export const storageKey = 'locations';
 
@@ -8,28 +8,20 @@ export const storageKey = 'locations';
   providedIn: 'root'
 })
 export class LocationService {
-  private weatherService = inject(WeatherService);
   private localStorageService = inject(LocalStorageService);
 
-  locations: string[] = [];
+  private _locations$ = new BehaviorSubject<string[]>([]);
+  locations$ = this._locations$.asObservable().pipe(tap((locations) => this.localStorageService.write(locations)));
 
   constructor() {
-    this.locations = this.localStorageService.read();
-    for (const loc of this.locations) this.weatherService.addCurrentConditions(loc);
+    this._locations$.next(this.localStorageService.read());
   }
 
-  addLocation(zipcode: string) {
-    this.locations.push(zipcode);
-    this.localStorageService.write(this.locations);
-    this.weatherService.addCurrentConditions(zipcode);
+  addLocation(zipcodeToAdd: string) {
+    this._locations$.next([...this._locations$.getValue(), zipcodeToAdd]);
   }
 
-  removeLocation(zipcode: string) {
-    const index = this.locations.indexOf(zipcode);
-    if (index !== -1) {
-      this.locations.splice(index, 1);
-      this.localStorageService.write(this.locations);
-      this.weatherService.removeCurrentConditions(zipcode);
-    }
+  removeLocation(zipcodeToRemove: string) {
+    this._locations$.next(this._locations$.getValue().filter((zipcode) => zipcode !== zipcodeToRemove));
   }
 }
