@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { WeatherService } from '../weather.service';
 import { ActivatedRoute } from '@angular/router';
+import { WeatherService } from '../weather.service';
 import { Forecast } from './forecast.type';
 
 @Component({
@@ -9,8 +9,8 @@ import { Forecast } from './forecast.type';
   styleUrls: ['./forecasts-list.component.css']
 })
 export class ForecastsListComponent {
-  zipcode: string;
-  forecast: Forecast;
+  zipcode!: string;
+  forecast!: Forecast;
 
   constructor(
     protected weatherService: WeatherService,
