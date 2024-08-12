@@ -3,7 +3,7 @@
     <div class="panel-heading">
       <h3 class="panel-title">
         5-day forecast for
-        {{ forecast?.city.name }}
+        {{ forecast.city.name }}
       </h3>
     </div>
     <ul class="list-group">
@@ -18,9 +18,8 @@
         {{ dailyForecast.temp.max | number: '.0-0' }}
 
         <img
-          [src]="weatherService.getWeatherIcon(dailyForecast.weather[0].id)"
-          class="icon"
-          [alt]="dailyForecast.weather[0].id" />
+          [src]="getIcon(dailyForecast.weather[0].id)"
+          class="icon" />
       </li>
     </ul>
   </div>

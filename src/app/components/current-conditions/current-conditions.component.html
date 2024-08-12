@@ -18,10 +18,10 @@
     <div>
       <span
         class="close"
-        (click)="locationService.removeLocation(location.zip)"
+        (click)="removeLocation(location.zip)"
         >&times;</span
       >
-      <img [src]="weatherService.getWeatherIcon(location.data.weather[0].id)" />
+      <img [src]="getIcon(location.data.weather[0].id)" />
     </div>
   </div>
 </div>

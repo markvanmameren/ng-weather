@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { DatePipe, DecimalPipe, NgFor } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WeatherService } from '../../services/weather/weather.service';
 import { Forecast } from './forecast.type';
-import { NgFor, DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-forecasts-list',
@@ -15,13 +15,17 @@ export class ForecastsListComponent {
   zipcode!: string;
   forecast!: Forecast;
 
-  constructor(
-    protected weatherService: WeatherService,
-    route: ActivatedRoute
-  ) {
-    route.params.subscribe((params) => {
+  private weatherService = inject(WeatherService);
+  private route = inject(ActivatedRoute);
+
+  constructor() {
+    this.route.params.subscribe((params) => {
       this.zipcode = params['zipcode'];
-      weatherService.getForecast(this.zipcode).subscribe((data) => (this.forecast = data));
+      this.weatherService.getForecast(this.zipcode).subscribe((data) => (this.forecast = data));
     });
+  }
+
+  getIcon(iconId: number): string {
+    return this.weatherService.getWeatherIcon(iconId);
   }
 }
