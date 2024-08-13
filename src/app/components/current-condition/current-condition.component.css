@@ -1,4 +1,26 @@
 .well.flex {
   background-color: #f5f5f5;
   padding: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  header {
+    flex-shrink: 1;
+
+    & > * {
+      color: #666371;
+    }
+
+    a {
+      color: #62abd3;
+      text-decoration: none;
+    }
+  }
+
+  .img-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
 }

@@ -1,7 +1,7 @@
 <div
   class="well flex"
   (click)="showForecast()">
-  <div>
+  <header>
     <h4>Current conditions: {{ currentCondition().weather[0].main }}</h4>
     <h4>Temperatures today:</h4>
     <p>
@@ -11,8 +11,8 @@
     <p>
       <a [routerLink]="['/forecast', zipcode()]">Show 5-day forecast for {{ currentCondition().name }}</a>
     </p>
-  </div>
-  <div>
+  </header>
+  <div class="img-container">
     <img [src]="getIcon(currentCondition().weather[0].id)" />
   </div>
 </div>
