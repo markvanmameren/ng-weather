@@ -4,17 +4,17 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class LocalStorageService {
-  private readonly storageKey = 'locations';
+  private static readonly storageKey = 'locations';
 
-  read(): string[] {
-    const stringifiedZipcodes = localStorage.getItem(this.storageKey);
+  readZipcodes(): string[] {
+    const stringifiedZipcodes = localStorage.getItem(LocalStorageService.storageKey);
     if (stringifiedZipcodes === null) return [];
     const zipcodes: string[] = JSON.parse(stringifiedZipcodes);
     return zipcodes;
   }
 
-  write(zipcodes: string[]): void {
+  writeZipcodes(zipcodes: string[]): void {
     const stringifiedZipcodes = JSON.stringify(zipcodes);
-    localStorage.setItem(this.storageKey, stringifiedZipcodes);
+    localStorage.setItem(LocalStorageService.storageKey, stringifiedZipcodes);
   }
 }

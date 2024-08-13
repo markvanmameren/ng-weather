@@ -11,10 +11,10 @@ export class LocationService {
   private localStorageService = inject(LocalStorageService);
 
   private _locations$ = new BehaviorSubject<string[]>([]);
-  locations$ = this._locations$.asObservable().pipe(tap((locations) => this.localStorageService.write(locations)));
+  locations$ = this._locations$.asObservable().pipe(tap((locations) => this.localStorageService.writeZipcodes(locations)));
 
   constructor() {
-    this._locations$.next(this.localStorageService.read());
+    this._locations$.next(this.localStorageService.readZipcodes());
   }
 
   private get locations(): string[] {

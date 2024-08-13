@@ -1,7 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, map, Observable, switchMap } from 'rxjs';
-
-import { HttpClient } from '@angular/common/http';
 import { Forecast } from '../../components/forecasts-list/forecast.type';
 import { CurrentConditions } from '../../types/current-conditions.type';
 import { LocationService } from '../location/location.service';
