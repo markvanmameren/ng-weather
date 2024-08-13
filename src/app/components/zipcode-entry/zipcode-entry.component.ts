@@ -4,7 +4,8 @@ import { LocationService } from '../../services/location/location.service';
 @Component({
   selector: 'app-zipcode-entry',
   templateUrl: './zipcode-entry.component.html',
-  standalone: true
+  standalone: true,
+  styleUrl: './zipcode-entry.component.css'
 })
 export class ZipcodeEntryComponent {
   private locationService = inject(LocationService);

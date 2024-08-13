@@ -2,7 +2,6 @@
   class="well flex"
   (click)="showForecast()">
   <div>
-    <h3>{{ currentCondition().name }} ({{ zipcode() }})</h3>
     <h4>Current conditions: {{ currentCondition().weather[0].main }}</h4>
     <h4>Temperatures today:</h4>
     <p>

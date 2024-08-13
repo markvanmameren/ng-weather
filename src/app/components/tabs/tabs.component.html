@@ -16,8 +16,8 @@
   </ul>
 </header>
 
-<section class="content">
-  @if (activeTab(); as tab) {
+@if (activeTab(); as tab) {
+  <section class="content">
     <ng-container *ngComponentOutlet="tabs().componentType; inputs: tab.componentInputs"></ng-container>
-  }
-</section>
+  </section>
+}

@@ -22,6 +22,8 @@ export class LocationService {
   }
 
   addLocation(zipcodeToAdd: string) {
+    if (this.locations.includes(zipcodeToAdd)) return;
+
     this._locations$.next([...this.locations, zipcodeToAdd]);
   }
 

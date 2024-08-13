@@ -1,9 +1,3 @@
-<app-tabs [tabs]="mockTabs"></app-tabs>
-
-<div>
-  @for (location of currentConditions$ | async; track location.zip) {
-    <app-current-condition
-      [zipcode]="location.zip"
-      [currentCondition]="location.data"></app-current-condition>
-  }
-</div>
+@if (tabs$ | async; as tabs) {
+  <app-tabs [tabs]="tabs"></app-tabs>
+}

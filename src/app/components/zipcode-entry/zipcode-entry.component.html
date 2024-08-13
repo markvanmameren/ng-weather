@@ -5,10 +5,9 @@
     #zipcode
     placeholder="Zipcode"
     class="form-control" />
-  <br />
   <button
     class="btn btn-primary"
-    (click)="addLocation(zipcode.value)">
+    (click)="addLocation(zipcode.value); zipcode.value = ''">
     Add location
   </button>
 </div>
