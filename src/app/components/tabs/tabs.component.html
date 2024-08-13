@@ -1,0 +1,23 @@
+<header>
+  <ul class="tabs">
+    @for (tab of tabs().tabs; track tab.id) {
+      <li class="tab">
+        <span
+          class="tab-title"
+          [innerText]="tab.title"
+          (click)="activateTab(tab.id)"></span>
+        <button
+          class="close"
+          (click)="$event.stopPropagation(); closeTab(tab.id)">
+          X
+        </button>
+      </li>
+    }
+  </ul>
+</header>
+
+<section class="content">
+  @if (activeTab(); as tab) {
+    <ng-container *ngComponentOutlet="tabs().componentType; inputs: tab.componentInputs"></ng-container>
+  }
+</section>

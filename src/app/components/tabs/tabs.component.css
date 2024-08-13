@@ -1,0 +1,45 @@
+:host {
+  display: flex;
+  flex-direction: column;
+
+  header {
+    color: white;
+
+    ul.tabs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      gap: 3px;
+
+      li.tab {
+        background-color: #617ba0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        border-color: black;
+        border-style: solid;
+        border-width: 1px 1px 0;
+        gap: 8px;
+        padding: 4px 8px;
+        cursor: pointer;
+
+        button.close {
+          background-color: transparent;
+          color: white;
+          border: none;
+        }
+      }
+    }
+  }
+
+  section.content {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    min-height: 100px;
+    padding: 20px;
+  }
+}

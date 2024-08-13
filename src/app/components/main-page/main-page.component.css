@@ -1,0 +1,5 @@
+div.container-fluid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

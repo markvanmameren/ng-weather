@@ -17,11 +17,15 @@ export class LocationService {
     this._locations$.next(this.localStorageService.read());
   }
 
+  private get locations(): string[] {
+    return this._locations$.getValue();
+  }
+
   addLocation(zipcodeToAdd: string) {
-    this._locations$.next([...this._locations$.getValue(), zipcodeToAdd]);
+    this._locations$.next([...this.locations, zipcodeToAdd]);
   }
 
   removeLocation(zipcodeToRemove: string) {
-    this._locations$.next(this._locations$.getValue().filter((zipcode) => zipcode !== zipcodeToRemove));
+    this._locations$.next(this.locations.filter((zipcode) => zipcode !== zipcodeToRemove));
   }
 }

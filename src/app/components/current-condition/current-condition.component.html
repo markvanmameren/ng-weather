@@ -1,0 +1,19 @@
+<div
+  class="well flex"
+  (click)="showForecast()">
+  <div>
+    <h3>{{ currentCondition().name }} ({{ zipcode() }})</h3>
+    <h4>Current conditions: {{ currentCondition().weather[0].main }}</h4>
+    <h4>Temperatures today:</h4>
+    <p>
+      Current {{ currentCondition().main.temp | number: '.0-0' }} - Max {{ currentCondition().main.temp_max | number: '.0-0' }} - Min
+      {{ currentCondition().main.temp_min | number: '.0-0' }}
+    </p>
+    <p>
+      <a [routerLink]="['/forecast', zipcode()]">Show 5-day forecast for {{ currentCondition().name }}</a>
+    </p>
+  </div>
+  <div>
+    <img [src]="getIcon(currentCondition().weather[0].id)" />
+  </div>
+</div>
