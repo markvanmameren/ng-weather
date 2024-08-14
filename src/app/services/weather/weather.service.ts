@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { combineLatest, map, Observable, shareReplay, switchMap } from 'rxjs';
+import { combineLatest, interval, map, Observable, shareReplay, startWith, switchMap, tap } from 'rxjs';
 import { Current } from '../../types/current.type';
 import { Forecast } from '../../types/forecast.type';
 import { LocationService } from '../location/location.service';
@@ -23,12 +23,15 @@ export class WeatherService {
   static URL = 'https://api.openweathermap.org/data/2.5';
   static APPID = '5a4b2d457ecbef9eb2a71e480b947604';
   static ICON_URL = 'https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-hdpi/';
+  static MAX_CACHE_DURATION = 60 * 60 * 2 * 1000; // in milliseconds
 
   private httpClient = inject(HttpClient);
   private locationService = inject(LocationService);
 
-  private cache$: Observable<Cache> = this.locationService.locations$.pipe(
-    switchMap((zipcodes) => this.getWeather$(zipcodes).pipe(map((weather): Cache => ({ weather, cachedOn: new Date() })))),
+  private refreshCache$ = interval(WeatherService.MAX_CACHE_DURATION).pipe(startWith(0));
+  private cache$: Observable<Cache> = combineLatest([this.locationService.locations$, this.refreshCache$]).pipe(
+    switchMap(([zipcodes]) => this.getWeather$(zipcodes).pipe(map((weather): Cache => ({ weather, cachedOn: new Date() })))),
+    tap(console.log),
     shareReplay(1)
   );
 
@@ -50,13 +53,7 @@ export class WeatherService {
 
   private getWeatherForZipcode$(zipcode: string): Observable<Weather> {
     return combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
-      map(
-        ([current, forecast]): Weather => ({
-          zipcode,
-          current,
-          forecast
-        })
-      )
+      map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
     );
   }
 

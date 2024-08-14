@@ -1,5 +1,5 @@
 import { JsonPipe, NgComponentOutlet } from '@angular/common';
-import { Component, computed, effect, input, Signal, signal, Type } from '@angular/core';
+import { Component, computed, input, Signal, signal, Type } from '@angular/core';
 import { Tab, Tabs } from '../../types/tab.type';
 
 @Component({
@@ -14,13 +14,6 @@ export class TabsComponent<T extends Type<unknown>> {
 
   activeTabId = signal<string | null>(null);
   activeTab: Signal<Tab<T> | undefined> = computed(() => this.tabs().tabs.find(({ id }) => id === this.activeTabId()));
-
-  // TODO - remove
-  constructor() {
-    effect(() => {
-      console.log(this.tabs());
-    });
-  }
 
   activateTab(tabIdToOpen: string): void {
     this.activeTabId.set(tabIdToOpen);
