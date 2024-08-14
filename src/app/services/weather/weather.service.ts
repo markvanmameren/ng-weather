@@ -28,7 +28,6 @@ export class WeatherService {
   ]).pipe(
     switchMap(([zipcodes]) => {
       const cache = this.localStorageService.readCache();
-      console.log(`cache check - ${this.isCacheValid(cache, zipcodes) ? 'VALID' : 'INVALID'}`, cache);
       return this.isCacheValid(cache, zipcodes) ? of(cache) : this.createCache$(zipcodes);
     }),
     shareReplay(1)

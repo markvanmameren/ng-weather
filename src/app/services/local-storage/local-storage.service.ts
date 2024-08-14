@@ -5,19 +5,13 @@ import { Cache } from '../../types/cache.type';
   providedIn: 'root'
 })
 export class LocalStorageService {
-  private static readonly storageKey = 'ng-weather';
   private static readonly cacheKey = 'ng-weather-cache';
 
   readZipcodes(): string[] {
-    const stringifiedZipcodes = localStorage.getItem(LocalStorageService.storageKey);
-    if (stringifiedZipcodes === null) return [];
-    const zipcodes: string[] = JSON.parse(stringifiedZipcodes);
-    return zipcodes;
-  }
+    const cache = this.readCache();
+    if (cache === null) return [];
 
-  writeZipcodes(zipcodes: string[]): void {
-    const stringifiedZipcodes = JSON.stringify(zipcodes);
-    localStorage.setItem(LocalStorageService.storageKey, stringifiedZipcodes);
+    return cache.weather.map(({ zipcode }) => zipcode);
   }
 
   readCache(): Cache | null {
