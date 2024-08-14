@@ -2,21 +2,21 @@ import { DecimalPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { WeatherService } from '../../services/weather/weather.service';
-import { CurrentConditions } from '../../types/current-conditions.type';
+import { Current } from '../../types/current.type';
 
 @Component({
-  selector: 'app-current-condition',
+  selector: 'app-current',
   standalone: true,
   imports: [DecimalPipe, RouterLink],
-  templateUrl: './current-condition.component.html',
-  styleUrl: './current-condition.component.css'
+  templateUrl: './current.component.html',
+  styleUrl: './current.component.css'
 })
-export class CurrentConditionComponent {
+export class CurrentComponent {
   private router = inject(Router);
   private weatherService = inject(WeatherService);
 
   zipcode = input.required<string>();
-  currentCondition = input.required<CurrentConditions>();
+  current = input.required<Current>();
 
   showForecast(): void {
     this.router.navigate(['/forecast', this.zipcode()]);

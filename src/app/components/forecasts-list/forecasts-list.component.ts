@@ -17,7 +17,8 @@ export class ForecastsListComponent {
 
   forecast$ = this.route.paramMap.pipe(
     map((paramMap) => paramMap.get('zipcode')),
-    switchMap((zipcode) => (zipcode === null ? of(null) : this.weatherService.getForecast(zipcode)))
+    switchMap((zipcode) => (zipcode === null ? of(null) : this.weatherService.weatherForZipcode$(zipcode))),
+    map((weather) => weather?.forecast ?? null)
   );
 
   getIcon(iconId: number): string {

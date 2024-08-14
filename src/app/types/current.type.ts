@@ -1,4 +1,4 @@
-export interface CurrentConditions {
+export interface Current {
   coord: Coord;
   weather: Weather[];
   base: string;

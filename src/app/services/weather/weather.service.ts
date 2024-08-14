@@ -1,9 +1,20 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { combineLatest, map, Observable, switchMap } from 'rxjs';
-import { Forecast } from '../../components/forecasts-list/forecast.type';
-import { CurrentConditions } from '../../types/current-conditions.type';
+import { combineLatest, map, Observable, shareReplay, switchMap } from 'rxjs';
+import { Current } from '../../types/current.type';
+import { Forecast } from '../../types/forecast.type';
 import { LocationService } from '../location/location.service';
+
+interface Weather {
+  zipcode: string;
+  current: Current;
+  forecast: Forecast;
+}
+
+interface Cache {
+  cachedOn: Date;
+  weather: Weather[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -16,20 +27,41 @@ export class WeatherService {
   private httpClient = inject(HttpClient);
   private locationService = inject(LocationService);
 
-  currentConditions$ = this.locationService.locations$.pipe(
-    switchMap((zipcodes) => combineLatest(zipcodes.map((zip) => this.getCurrentConditions(zip).pipe(map((data) => ({ zip, data }))))))
+  private cache$: Observable<Cache> = this.locationService.locations$.pipe(
+    switchMap((zipcodes) => this.getWeather$(zipcodes).pipe(map((weather): Cache => ({ weather, cachedOn: new Date() })))),
+    shareReplay(1)
   );
 
-  getCurrentConditions(zipcode: string): Observable<CurrentConditions> {
-    return this.httpClient.get<CurrentConditions>(
-      `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`
-    );
+  weather$: Observable<Weather[]> = this.cache$.pipe(map(({ weather }) => weather));
+
+  weatherForZipcode$(zipcode: string): Observable<Weather | null> {
+    return this.weather$.pipe(map((weather) => weather.find((weather) => weather.zipcode === zipcode) ?? null));
   }
 
-  getForecast(zipcode: string): Observable<Forecast> {
+  private getCurrent$(zipcode: string): Observable<Current> {
+    return this.httpClient.get<Current>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
+  }
+
+  private getForecast$(zipcode: string): Observable<Forecast> {
     return this.httpClient.get<Forecast>(
       `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`
     );
+  }
+
+  private getWeatherForZipcode$(zipcode: string): Observable<Weather> {
+    return combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
+      map(
+        ([current, forecast]): Weather => ({
+          zipcode,
+          current,
+          forecast
+        })
+      )
+    );
+  }
+
+  private getWeather$(zipcodes: string[]): Observable<Weather[]> {
+    return combineLatest(zipcodes.map((zipcode) => this.getWeatherForZipcode$(zipcode)));
   }
 
   getWeatherIcon(id: number): string {
