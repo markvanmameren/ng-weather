@@ -21,13 +21,15 @@ export class LocationService {
     return this._locations$.getValue();
   }
 
-  addLocation(zipcodeToAdd: string) {
+  addLocation(zipcodeToAdd: string): void {
     if (this.locations.includes(zipcodeToAdd)) return;
 
     this._locations$.next([...this.locations, zipcodeToAdd]);
   }
 
-  removeLocation(zipcodeToRemove: string) {
+  removeLocation(zipcodeToRemove: string): void {
+    if (!this.locations.includes(zipcodeToRemove)) return;
+
     this._locations$.next(this.locations.filter((zipcode) => zipcode !== zipcodeToRemove));
   }
 }

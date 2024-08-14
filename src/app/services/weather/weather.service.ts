@@ -5,6 +5,7 @@ import { Cache } from '../../types/cache.type';
 import { Current } from '../../types/current.type';
 import { Forecast } from '../../types/forecast.type';
 import { Weather } from '../../types/weather.type';
+import { LocalStorageService } from '../local-storage/local-storage.service';
 import { LocationService } from '../location/location.service';
 
 @Injectable({
@@ -18,12 +19,15 @@ export class WeatherService {
 
   private httpClient = inject(HttpClient);
   private locationService = inject(LocationService);
+  private localStorageService = inject(LocalStorageService);
 
   private refreshCache$ = interval(WeatherService.MAX_CACHE_DURATION).pipe(startWith(0));
   private cache$: Observable<Cache> = combineLatest([this.locationService.locations$, this.refreshCache$]).pipe(
     switchMap(([zipcodes]) => this.getWeather$(zipcodes).pipe(map((weather): Cache => ({ weather, cachedOn: new Date() })))),
     tap(console.log),
-    shareReplay(1)
+    shareReplay(1),
+    tap((cache) => this.localStorageService.writeCache(cache)),
+    tap(() => console.log('written to localStorage'))
   );
 
   weather$: Observable<Weather[]> = this.cache$.pipe(map(({ weather }) => weather));
@@ -42,14 +46,14 @@ export class WeatherService {
     );
   }
 
-  private getWeatherForZipcode$(zipcode: string): Observable<Weather> {
-    return combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
-      map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
-    );
-  }
-
   private getWeather$(zipcodes: string[]): Observable<Weather[]> {
-    return combineLatest(zipcodes.map((zipcode) => this.getWeatherForZipcode$(zipcode)));
+    return combineLatest(
+      zipcodes.map((zipcode) =>
+        combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
+          map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
+        )
+      )
+    );
   }
 
   getWeatherIcon(id: number): string {
