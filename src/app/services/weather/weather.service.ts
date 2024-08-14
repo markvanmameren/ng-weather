@@ -1,20 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, interval, map, Observable, shareReplay, startWith, switchMap, tap } from 'rxjs';
+import { Cache } from '../../types/cache.type';
 import { Current } from '../../types/current.type';
 import { Forecast } from '../../types/forecast.type';
+import { Weather } from '../../types/weather.type';
 import { LocationService } from '../location/location.service';
-
-interface Weather {
-  zipcode: string;
-  current: Current;
-  forecast: Forecast;
-}
-
-interface Cache {
-  cachedOn: Date;
-  weather: Weather[];
-}
 
 @Injectable({
   providedIn: 'root'
