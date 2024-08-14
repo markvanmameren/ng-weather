@@ -1,6 +1,6 @@
 import { Weather } from './weather.type';
 
 export interface Cache {
-  cachedOn: Date;
+  cachedOn: number;
   weather: Weather[];
 }
