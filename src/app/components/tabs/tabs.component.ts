@@ -1,11 +1,11 @@
-import { JsonPipe, NgComponentOutlet } from '@angular/common';
+import { NgComponentOutlet } from '@angular/common';
 import { Component, computed, input, Signal, signal, Type } from '@angular/core';
 import { Tab, Tabs } from '../../types/tab.type';
 
 @Component({
   selector: 'app-tabs',
   standalone: true,
-  imports: [NgComponentOutlet, JsonPipe],
+  imports: [NgComponentOutlet],
   templateUrl: './tabs.component.html',
   styleUrl: './tabs.component.css'
 })

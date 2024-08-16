@@ -5,13 +5,13 @@ import { WeatherService } from '../../services/weather/weather.service';
 import { Current } from '../../types/current.type';
 
 @Component({
-  selector: 'app-current',
+  selector: 'app-current-card',
   standalone: true,
   imports: [DecimalPipe, RouterLink],
-  templateUrl: './current.component.html',
-  styleUrl: './current.component.css'
+  templateUrl: './current-card.component.html',
+  styleUrl: './current-card.component.css'
 })
-export class CurrentComponent {
+export class CurrentCardComponent {
   private router = inject(Router);
   private weatherService = inject(WeatherService);
 

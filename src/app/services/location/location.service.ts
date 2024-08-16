@@ -14,7 +14,7 @@ export class LocationService {
   locations$ = this._locations$.asObservable();
 
   constructor() {
-    this._locations$.next(this.localStorageService.readZipcodes());
+    this._locations$.next(this.localStorageService.readLocations());
   }
 
   private get locations(): string[] {

@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { combineLatest, interval, map, Observable, of, shareReplay, startWith, switchMap, tap } from 'rxjs';
-import { Cache } from '../../types/cache.type';
+import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { Current } from '../../types/current.type';
 import { Forecast } from '../../types/forecast.type';
 import { Weather } from '../../types/weather.type';
-import { LocalStorageService } from '../local-storage/local-storage.service';
+import { CacheService } from '../cache/cache.service';
 import { LocationService } from '../location/location.service';
 
 @Injectable({
@@ -15,36 +14,10 @@ export class WeatherService {
   static URL = 'https://api.openweathermap.org/data/2.5';
   static APPID = '5a4b2d457ecbef9eb2a71e480b947604';
   static ICON_URL = 'https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-hdpi/';
-  static CACHE_CHECK_INTERVAL = 10 * 1000; // 10 seconds in ms
-  static CACHE_VALID_DURATION = 2 * 60 * 60 * 1000; // 2 hours in ms
 
   private httpClient = inject(HttpClient);
+  private cacheService = inject(CacheService);
   private locationService = inject(LocationService);
-  private localStorageService = inject(LocalStorageService);
-
-  private cache$: Observable<Cache> = combineLatest([
-    this.locationService.locations$,
-    interval(WeatherService.CACHE_CHECK_INTERVAL).pipe(startWith(0))
-  ]).pipe(
-    switchMap(([zipcodes]) => {
-      const cache = this.localStorageService.readCache();
-      return this.isCacheValid(cache, zipcodes) ? of(cache) : this.createCache$(zipcodes);
-    }),
-    shareReplay(1)
-  );
-
-  weather$: Observable<Weather[]> = this.cache$.pipe(map(({ weather }) => weather));
-
-  createCache$(zipcodes: string[]): Observable<Cache> {
-    return this.getWeather$(zipcodes).pipe(
-      map((weather): Cache => ({ weather, cachedOn: this.now() })),
-      tap((cache) => this.localStorageService.writeCache(cache))
-    );
-  }
-
-  weatherForZipcode$(zipcode: string): Observable<Weather | null> {
-    return this.weather$.pipe(map((weather) => weather.find((weather) => weather.zipcode === zipcode) ?? null));
-  }
 
   getWeatherIcon(id: number): string {
     if (id >= 200 && id <= 232) return WeatherService.ICON_URL + 'art_storm.png';
@@ -56,36 +29,37 @@ export class WeatherService {
     else return WeatherService.ICON_URL + 'art_clear.png';
   }
 
-  private now(): number {
-    return new Date().valueOf();
-  }
+  private getCurrent$ = (zipcode: string): Observable<Current> =>
+    this.httpClient.get<Current>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
 
-  private getCurrent$(zipcode: string): Observable<Current> {
-    return this.httpClient.get<Current>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
-  }
-
-  private getForecast$(zipcode: string): Observable<Forecast> {
-    return this.httpClient.get<Forecast>(
+  private getForecast$ = (zipcode: string): Observable<Forecast> =>
+    this.httpClient.get<Forecast>(
       `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`
     );
-  }
 
-  private getWeather$(zipcodes: string[]): Observable<Weather[]> {
-    return combineLatest(
-      zipcodes.map((zipcode) =>
-        combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
-          map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
+  private getWeatherForZipcode$ = (zipcode: string): Observable<Weather> =>
+    combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
+      map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
+    );
+
+  private getWeatherForAllZipcodes$ = (zipcodes: string[]): Observable<Weather[]> =>
+    combineLatest(zipcodes.map(this.getWeatherForZipcode$));
+
+  weatherForAllZipcodes$: Observable<Weather[]> = this.cacheService.createCachable$({
+    cacheKey: 'weather',
+    createFn$: () =>
+      this.locationService.locations$.pipe(
+        switchMap((locations) => (locations.length < 1 ? of([]) : this.getWeatherForAllZipcodes$(locations)))
+      ),
+    validateFn$: (cached) =>
+      this.locationService.locations$.pipe(
+        map(
+          (locations) =>
+            locations.length === cached.length && locations.every((location) => cached.map(({ zipcode }) => zipcode).includes(location))
         )
       )
-    );
-  }
+  });
 
-  private isCacheValid(cache: Cache | null, zipcodes: string[]): cache is Cache {
-    return (
-      cache !== null &&
-      this.now() - cache.cachedOn < WeatherService.CACHE_VALID_DURATION &&
-      cache.weather.length === zipcodes.length &&
-      cache.weather.every(({ zipcode }) => zipcodes.includes(zipcode))
-    );
-  }
+  weatherForZipcode$ = (zipcode: string): Observable<Weather | null> =>
+    this.weatherForAllZipcodes$.pipe(map((weathers) => weathers.find((weather) => weather.zipcode === zipcode) ?? null));
 }

@@ -4,7 +4,7 @@ import { map, Observable } from 'rxjs';
 import { LocationService } from '../../services/location/location.service';
 import { WeatherService } from '../../services/weather/weather.service';
 import { Tab, Tabs } from '../../types/tab.type';
-import { CurrentComponent } from '../current/current.component';
+import { CurrentCardComponent } from '../current-card/current-card.component';
 import { TabsComponent } from '../tabs/tabs.component';
 
 @Component({
@@ -12,17 +12,17 @@ import { TabsComponent } from '../tabs/tabs.component';
   templateUrl: './current-conditions.component.html',
   styleUrls: ['./current-conditions.component.css'],
   standalone: true,
-  imports: [AsyncPipe, TabsComponent, CurrentComponent]
+  imports: [AsyncPipe, TabsComponent, CurrentCardComponent]
 })
 export class CurrentConditionsComponent {
   private weatherService = inject(WeatherService);
   private locationService = inject(LocationService);
 
-  tabs$: Observable<Tabs<typeof CurrentComponent>> = this.weatherService.weather$.pipe(
+  tabs$: Observable<Tabs<typeof CurrentCardComponent>> = this.weatherService.weatherForAllZipcodes$.pipe(
     map((weather) => ({
-      componentType: CurrentComponent,
+      componentType: CurrentCardComponent,
       tabs: weather.map(
-        ({ zipcode, current }): Tab<typeof CurrentComponent> => ({
+        ({ zipcode, current }): Tab<typeof CurrentCardComponent> => ({
           componentInputs: { zipcode, current },
           id: zipcode,
           title: `${current.name} (${zipcode})`,

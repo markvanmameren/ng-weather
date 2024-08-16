@@ -1,6 +1,10 @@
 import { Weather } from './weather.type';
 
+export interface Cached<T> {
+  cachedOn: number | null;
+  value: T;
+}
+
 export interface Cache {
-  cachedOn: number;
-  weather: Weather[];
+  weather: Cached<Weather[]>;
 }

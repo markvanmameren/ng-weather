@@ -5,17 +5,10 @@ import { Cache } from '../../types/cache.type';
   providedIn: 'root'
 })
 export class LocalStorageService {
-  private static readonly cacheKey = 'ng-weather-cache';
-
-  readZipcodes(): string[] {
-    const cache = this.readCache();
-    if (cache === null) return [];
-
-    return cache.weather.map(({ zipcode }) => zipcode);
-  }
+  private static readonly storageKeyCache = 'ng-weather-cache';
 
   readCache(): Cache | null {
-    const stringifiedCache = localStorage.getItem(LocalStorageService.cacheKey);
+    const stringifiedCache = localStorage.getItem(LocalStorageService.storageKeyCache);
     if (stringifiedCache === null) return null;
     const cache: Cache = JSON.parse(stringifiedCache);
     return cache;
@@ -23,6 +16,10 @@ export class LocalStorageService {
 
   writeCache(cache: Cache): void {
     const stringifiedCache = JSON.stringify(cache);
-    localStorage.setItem(LocalStorageService.cacheKey, stringifiedCache);
+    localStorage.setItem(LocalStorageService.storageKeyCache, stringifiedCache);
+  }
+
+  readLocations(): string[] {
+    return this.readCache()?.weather.value.map((weather) => weather.zipcode) ?? [];
   }
 }
