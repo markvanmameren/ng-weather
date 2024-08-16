@@ -1,7 +1,9 @@
 <header>
   <ul class="tabs">
     @for (tab of tabs().tabs; track tab.id) {
-      <li class="tab">
+      <li
+        class="tab"
+        [class.active]="tab.id === activeTabId()">
         <span
           class="tab-title"
           [innerText]="tab.title"

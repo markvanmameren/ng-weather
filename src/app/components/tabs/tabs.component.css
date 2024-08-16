@@ -24,6 +24,10 @@
         padding: 4px 8px;
         cursor: pointer;
 
+        &.active {
+          background-color: #0d6efd;
+        }
+
         button.close {
           background-color: transparent;
           color: white;
