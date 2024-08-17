@@ -27,6 +27,8 @@ export class CacheService {
 
   private localStorageService = inject(LocalStorageService);
 
+  private checkInterval$ = interval(CacheService.CACHE_CHECK_INTERVAL).pipe(startWith(0));
+
   private cacheSubject$ = new BehaviorSubject<AppCache>(this.initCache());
   private cache$: Observable<AppCache> = this.cacheSubject$.pipe(tap((cache) => this.localStorageService.writeCache(cache)));
 
@@ -43,13 +45,12 @@ export class CacheService {
     id: Id;
     createFn$: () => Observable<AppCache[CacheKey][Id]['value']>;
   }) {
-    return combineLatest([this.cache$, interval(CacheService.CACHE_CHECK_INTERVAL).pipe(startWith(0))]).pipe(
+    return combineLatest([this.cache$, this.checkInterval$]).pipe(
       map(([cache]) => cache[cacheKey][id]),
-      switchMap((cached) =>
-        this.isValidCache(cached)
-          ? of(cached.value)
-          : createFn$().pipe(tap((created) => this.addToCache<CacheKey, Id>(cacheKey, id, created)))
-      ),
+      switchMap((cached) => {
+        if (this.isValidCache(cached)) return of(cached.value);
+        return createFn$().pipe(tap((created) => this.addToCache<CacheKey, Id>(cacheKey, id, created)));
+      }),
       distinctUntilChanged(isEqual),
       shareReplay(1)
     );
