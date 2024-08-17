@@ -1,5 +1,6 @@
-import { Cache } from '../../types/cache.type';
+import { AppCache } from '../../types/cache-specific.type';
 
-export const initialCache: Cache = {
-  weather: { cachedOn: null, value: [] }
+export const initialCache: AppCache = {
+  current: {},
+  forecast: {}
 };

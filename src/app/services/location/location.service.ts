@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 
 export const storageKey = 'locations';
@@ -11,7 +11,7 @@ export class LocationService {
   private localStorageService = inject(LocalStorageService);
 
   private _locations$ = new BehaviorSubject<string[]>([]);
-  locations$ = this._locations$.asObservable();
+  locations$ = this._locations$.asObservable().pipe(tap((locations) => this.localStorageService.writeLocations(locations)));
 
   constructor() {
     this._locations$.next(this.localStorageService.readLocations());

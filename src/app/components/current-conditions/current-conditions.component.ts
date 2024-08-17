@@ -18,7 +18,7 @@ export class CurrentConditionsComponent {
   private weatherService = inject(WeatherService);
   private locationService = inject(LocationService);
 
-  tabs$: Observable<Tabs<typeof CurrentCardComponent>> = this.weatherService.weatherForAllZipcodes$.pipe(
+  tabs$: Observable<Tabs<typeof CurrentCardComponent>> = this.weatherService.allCurrent$.pipe(
     map((weather) => ({
       componentType: CurrentCardComponent,
       tabs: weather.map(

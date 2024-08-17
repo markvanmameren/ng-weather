@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { Current } from '../../types/current.type';
 import { Forecast } from '../../types/forecast.type';
-import { Weather } from '../../types/weather.type';
 import { CacheService } from '../cache/cache.service';
 import { LocationService } from '../location/location.service';
 
@@ -19,6 +18,14 @@ export class WeatherService {
   private cacheService = inject(CacheService);
   private locationService = inject(LocationService);
 
+  allCurrent$: Observable<{ zipcode: string; current: Current }[]> = this.locationService.locations$.pipe(
+    switchMap((zipcodes) =>
+      zipcodes.length > 0
+        ? combineLatest(zipcodes.map((zipcode) => this.getCurrent$(zipcode).pipe(map((current) => ({ zipcode, current })))))
+        : of([])
+    )
+  );
+
   getWeatherIcon(id: number): string {
     if (id >= 200 && id <= 232) return WeatherService.ICON_URL + 'art_storm.png';
     else if (id >= 501 && id <= 511) return WeatherService.ICON_URL + 'art_rain.png';
@@ -29,37 +36,21 @@ export class WeatherService {
     else return WeatherService.ICON_URL + 'art_clear.png';
   }
 
-  private getCurrent$ = (zipcode: string): Observable<Current> =>
-    this.httpClient.get<Current>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
+  getCurrent$ = (zipcode: string): Observable<Current> =>
+    this.cacheService.useCache({
+      cacheKey: 'current',
+      id: zipcode,
+      createFn$: () =>
+        this.httpClient.get<Current>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
+    });
 
-  private getForecast$ = (zipcode: string): Observable<Forecast> =>
-    this.httpClient.get<Forecast>(
-      `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`
-    );
-
-  private getWeatherForZipcode$ = (zipcode: string): Observable<Weather> =>
-    combineLatest([this.getCurrent$(zipcode), this.getForecast$(zipcode)]).pipe(
-      map(([current, forecast]): Weather => ({ zipcode, current, forecast }))
-    );
-
-  private getWeatherForAllZipcodes$ = (zipcodes: string[]): Observable<Weather[]> =>
-    combineLatest(zipcodes.map(this.getWeatherForZipcode$));
-
-  weatherForAllZipcodes$: Observable<Weather[]> = this.cacheService.createCachable$({
-    cacheKey: 'weather',
-    createFn$: () =>
-      this.locationService.locations$.pipe(
-        switchMap((locations) => (locations.length < 1 ? of([]) : this.getWeatherForAllZipcodes$(locations)))
-      ),
-    validateFn$: (cached) =>
-      this.locationService.locations$.pipe(
-        map(
-          (locations) =>
-            locations.length === cached.length && locations.every((location) => cached.map(({ zipcode }) => zipcode).includes(location))
+  getForecast$ = (zipcode: string): Observable<Forecast> =>
+    this.cacheService.useCache({
+      cacheKey: 'forecast',
+      id: zipcode,
+      createFn$: () =>
+        this.httpClient.get<Forecast>(
+          `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`
         )
-      )
-  });
-
-  weatherForZipcode$ = (zipcode: string): Observable<Weather | null> =>
-    this.weatherForAllZipcodes$.pipe(map((weathers) => weathers.find((weather) => weather.zipcode === zipcode) ?? null));
+    });
 }

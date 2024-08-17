@@ -13,7 +13,8 @@ import {
   switchMap,
   tap
 } from 'rxjs';
-import { Cache } from '../../types/cache.type';
+import { Cached } from '../../types/cache-generic.type';
+import { AppCache } from '../../types/cache-specific.type';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { initialCache } from './initial-cache';
 
@@ -26,45 +27,52 @@ export class CacheService {
 
   private localStorageService = inject(LocalStorageService);
 
-  private cacheSubject$ = new BehaviorSubject<Cache>(this.initCache());
-  private cache$: Observable<Cache> = this.cacheSubject$.pipe(tap((cache) => this.localStorageService.writeCache(cache)));
+  private cacheSubject$ = new BehaviorSubject<AppCache>(this.initCache());
+  private cache$: Observable<AppCache> = this.cacheSubject$.pipe(tap((cache) => this.localStorageService.writeCache(cache)));
 
-  private initCache(): Cache {
+  private initCache(): AppCache {
     return this.localStorageService.readCache() ?? initialCache;
   }
 
-  createCachable$<K extends keyof Cache>({
+  useCache<CacheKey extends keyof AppCache, Id extends keyof AppCache[CacheKey]>({
     cacheKey,
-    createFn$,
-    validateFn$
+    id,
+    createFn$
   }: {
-    cacheKey: K;
-    createFn$: () => Observable<Cache[K]['value']>;
-    validateFn$: (cached: Cache[K]['value']) => Observable<boolean>;
-  }): Observable<Cache[K]['value']> {
+    cacheKey: CacheKey;
+    id: Id;
+    createFn$: () => Observable<AppCache[CacheKey][Id]['value']>;
+  }) {
     return combineLatest([this.cache$, interval(CacheService.CACHE_CHECK_INTERVAL).pipe(startWith(0))]).pipe(
-      map(([cache]) => cache[cacheKey]),
+      map(([cache]) => cache[cacheKey][id]),
+      switchMap((cached) =>
+        this.isValidCache(cached)
+          ? of(cached.value)
+          : createFn$().pipe(tap((created) => this.addToCache<CacheKey, Id>(cacheKey, id, created)))
+      ),
       distinctUntilChanged(isEqual),
-      switchMap((cached) => {
-        const created$ = createFn$().pipe(tap((created) => this.addToCache<K>(cacheKey, created)));
-        if (!this.isValidCache(cached)) return created$;
-        return validateFn$(cached.value).pipe(switchMap((isValid) => (isValid ? of(cached.value) : created$)));
-      }),
       shareReplay(1)
     );
   }
 
-  private isValidCache<K extends keyof Cache>(cached: Cache[K]): boolean {
-    return cached !== undefined && cached.cachedOn !== null && this.now() - cached.cachedOn < CacheService.CACHE_VALID_DURATION;
-  }
-
-  private addToCache<K extends keyof Cache>(key: K, value: Cache[K]['value']): void {
-    const cached = { cachedOn: this.now(), value };
-    const cache: Cache = {
-      ...this.cacheSubject$.getValue(),
-      [key]: cached
+  private addToCache<CacheKey extends keyof AppCache, Id extends keyof AppCache[CacheKey]>(
+    cacheKey: CacheKey,
+    id: Id,
+    created: AppCache[CacheKey][Id]['value']
+  ): void {
+    const prevCache = this.cacheSubject$.getValue();
+    const cache: AppCache = {
+      ...prevCache,
+      [cacheKey]: {
+        ...prevCache[cacheKey],
+        [id]: { cachedOn: this.now(), value: created }
+      }
     };
     this.cacheSubject$.next(cache);
+  }
+
+  private isValidCache<T>(cached: Cached<T>): boolean {
+    return cached !== undefined && cached.cachedOn !== null && this.now() - cached.cachedOn < CacheService.CACHE_VALID_DURATION;
   }
 
   private now(): number {
